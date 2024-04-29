@@ -1,0 +1,18 @@
+---
+working_dir: 'C:\Temp\Working\Ansible'
+
+ansible_connection: psrp
+ansible_psrp_cert_validation: ignore
+ansible_psrp_protocol: https
+ansible_psrp_auth: ntlm
+ansible_psrp_credssp_auth_mechanism: ntlm
+ansible_become_method: runas
+
+local_users:
+    - Atlantis
+    - Starship
+    - Endeavour
+local_admins:
+    - Challenger
+    - Columbia
+

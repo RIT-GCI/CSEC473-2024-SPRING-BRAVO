@@ -1,0 +1,54 @@
+---
+# Set hostnames
+- name: Set a hostname
+  ansible.builtin.hostname:
+    name: "{{ instances[item].hostname }}"
+  when: ansible_host == instances[item].ip
+  loop: "{{ instances.keys() }}"
+
+- name: Replace a localhost entry with our own
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1'
+    line: "127.0.1.1       {{ instances[item].hostname }}"
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_host == instances[item].ip
+  loop: "{{ instances.keys() }}"
+
+# add local users
+- name: Add local users
+  user:
+    name: "{{ item }}"
+    shell: "/bin/bash"
+    password: "{{ 'P@ssw0rd!' | password_hash('sha512') }}"
+  loop: "{{ localusers.keys() }}"
+
+  # Install RustDesk 
+- name: Install wget
+  apt:
+    name: wget
+    state: present
+    update_cache: yes
+
+- name: wget rustdesk
+  ansible.builtin.shell: wget https://github.com/rustdesk/rustdesk/releases/download/1.2.3/rustdesk-1.2.3-x86_64.deb
+
+- name: update cache
+  ansible.builtin.shell: apt-get update --fix-missing
+
+- name: install
+  ansible.builtin.shell: apt install ./rustdesk-1.2.3-x86_64.deb -y 
+
+- name: start
+  ansible.builtin.shell: systemctl start rustdesk.service
+
+- name: enable
+  ansible.builtin.shell: systemctl enable rustdesk.service
+
+- name: remove package
+  ansible.builtin.shell: rm rustdesk*
+
+- name: set password
+  ansible.builtin.shell: rustdesk --password bluepass987

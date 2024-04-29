@@ -1,0 +1,85 @@
+---
+# - name: "Install Chocolatey" # Installs Chocolatey Package Manager
+#   win_chocolatey:
+#     name: chocolatey
+#     state: present
+
+- name: "Timezone Configs" # Updates timezone to EST
+  win_timezone:
+    timezone: "Eastern Standard Time"
+
+- name: "Enable Fire Wall" # Turns on all profiles of firewall
+  win_firewall:
+    state: enabled
+    profiles:
+      - Domain
+      - Private
+      - Public
+  tags: Enable_firewall
+
+- name: "Allow ICMPv4 Inbound Traffic"
+  win_firewall_rule:
+    name: "Allow-ICMPv4-Inbound"
+    enable: yes
+    direction: in
+    action: allow
+    protocol: icmpv4
+
+- name: Allow RDP Through Firewall # Ensures that inbound connections can occur for RDP
+  win_firewall_rule:
+    name: "Allow RDP"
+    localport: 3389
+    protocol: tcp
+    direction: in
+    action: allow
+
+- name: "RDP Multiple Login Access" # Lets multiple people RDP to 1 system 
+  win_shell: |
+    reg add HKLM\System\CurrentControlSet\Control\TerminalServer /v fSingleSessionPerUser /d 0 /f
+
+# - name: "Remove Windows Defender" # Removes Window Defender to prevent it from blocking programs during the competition
+#   win_shell: |
+#     Dism /online /Disable-Feature /FeatureName:Windows-Defender /Remove /quiet
+#   register: dism_result
+
+- name: "Remove unattend.xml" # removes a file used for building the Windows Box
+  win_file:
+    path: C:\\Windows\\Panther\\unattend.xml
+    state: absent
+
+- name: "SetUp Hostnames" # updates the hostname of the system based on the given hostname on the inventory file
+  win_hostname:
+    name: "{{ inventory_hostname | replace('.', '-') }}"
+  register: restart
+
+- name: "Disable Hibernation" 
+  win_shell: C:\Windows\System32\powercfg.exe /hibernate off
+
+- name: "Disable standby timeout"
+  win_shell: |
+    powercfg -change -standby-timeout-ac 0
+
+- name: "Add Local Administrator Accounts"  # Add administrator accounts base on the inventory file
+  win_user:
+    name: "{{ item }}"
+    password: "{{ default_pass }}"                  # Defualt password
+    groups: Administrators
+    state: present
+  loop: "{{ local_admins }}"
+
+- name: "Add Local Standard Users"          # Add standard users base on the list in the inventory file
+  win_user:
+    name: "{{ item }}"
+    password: "{{ default_pass }}"                 # Default password
+    groups: Users
+    state: present
+  loop: "{{ local_users }}"
+
+# - name: "Reboot Helper Task" # Might be temporary, Probably better way  to do this
+#   set_fact:
+#     reboot_required: "{{ dism_result.changed }}"
+
+- name: "Reboot" # Reboots Windows Box if needed
+  win_reboot:
+  when: restart.reboot_required
+  tags: Reboot_windows

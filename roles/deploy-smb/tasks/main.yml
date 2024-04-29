@@ -1,0 +1,28 @@
+---
+# Set Admin password
+- name: Admin Password
+  ansible.windows.win_user:
+    name: Administrator
+    password: password 
+
+# Set hostnames
+- name: Change the hostname
+  ansible.windows.win_hostname:
+    name: "{{ instances[item].hostname }}"
+  when: ansible_host == "{{ instances[item].ip }}"
+  loop: "{{ instances.keys() }}"
+
+# Install File Services
+- name: Install File-Services
+  win_feature:
+    name: File-Services
+    state: present
+    include_sub_features: yes
+    include_management_tools: yes
+
+- name: Reboot
+  ansible.windows.win_reboot:
+
+# Install RustDesk 
+# - name: Install rustdesk
+#   ansible.builtin.shell: 

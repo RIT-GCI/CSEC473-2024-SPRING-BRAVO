@@ -1,0 +1,18 @@
+---
+# vars for blue-smb
+flavor: medium
+image: WinSrv2022-20348-2022
+key: BlueTeamKey
+volume_size: 81
+user_data: ./files/userdata.ps1
+net_id_rustdesk: 0133d03d-f45e-420c-b4b6-4d4419b2990a
+instances:
+  Blue01-SMB-Metis:
+    ip: 10.0.1.13
+    net_id_blue_remote: 05e5e706-3cc2-43c6-b00e-3b1d7907f503
+    hostname: Metis
+  Blue02-SMB-Adrastea:
+    ip: 10.0.2.13
+    net_id_blue_remote: 3fe85239-89d9-4e06-8b44-9b3167b48a59
+    hostname: Adrastea
+

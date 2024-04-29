@@ -1,0 +1,169 @@
+all:
+  vars:
+    team_number: "PlaceHolder"
+    host_octets: "PlaceHolder"
+    subnet_ish: "PlaceHolder"
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+  children:
+    # Local
+    apollo:
+      vars:
+        ansible_host: "192.168.{{ team_number|int }}.10"
+        host_octets: "10"
+      hosts:
+        apollo.team[01:02]:
+    falcon:
+      vars:
+        ansible_host: "192.168.{{ team_number|int }}.20"
+        host_octets: "20"
+      hosts:
+        falcon.team[01:02]:
+    electron:
+      vars:
+        ansible_host: "192.168.{{ team_number|int }}.30"
+        host_octets: "30"
+      hosts:
+        electron.team[01:02]:
+    discovery:
+      vars:
+        ansible_host: "192.168.{{ team_number|int }}.40"
+        host_octets: "40"
+      hosts:
+        discovery.team[01:02]:
+
+    # Remote
+    mercury:
+      vars:
+        ansible_host: "10.0.{{ team_number|int }}.10"
+        host_octets: "10"
+      hosts:
+        mercury.team[01:02]:
+    # surveyor:
+    #   vars:
+    #     ansible_host: "10.0.{{ team_number|int }}.20"
+    #     host_octets: "20"
+    #   hosts:
+    #     surveyor.team[01:02]:
+    pioneer:
+      vars:
+        ansible_host: "10.0.{{ team_number|int }}.20"
+        host_octets: "20"
+      hosts:
+        pioneer.team[01:02]:
+    # atlas:
+    #   vars:
+    #     ansible_host: "10.0.{{ team_number|int }}.20"
+    #     host_octets: "40"
+    #   hosts:
+    #     atlas.team[01:02]:
+
+    # Satellite
+    satellite:
+      vars:
+        ansible_host: "172.128.{{ team_number|int }}.10"
+        host_octets: "10"
+      hosts:
+        satellite.team[01:02]:
+
+    windows:
+      children:
+        apollo:
+        electron:
+        pioneer:
+
+    # Hosts that are Linux
+    linux:
+      children:
+        falcon:
+        discovery:
+        mercury:
+        satellite:
+
+    # Hosts on the LAN Network
+    lan:
+      vars:
+        subbnet_ish: "192.168.{{ team_number|int}}."
+      children:
+        apollo:
+        falcon:
+        electron:
+        discovery:
+
+    # Hosts on the Cloud Network
+    cloud:
+      vars:
+        subbnet_ish: "10.0.{{ team_number|int }}."
+      children:
+        mercury:
+        pioneer:
+        satellite:
+
+    router:
+      children:
+        saturn:
+          vars:
+            ansible_host: "10.10.{{ team_number|int }}.230"
+        jupiter:
+          vars:
+            ansible_host: "10.10.{{ team_number|int }}.231"
+        uranus:
+          vars:
+            ansible_host: "10.10.{{ team_number|int }}.232"
+        neptune:
+          vars:
+            ansible_host: "10.10.{{ team_number|int }}.233"
+
+    # Red team vars
+    metis:
+      vars:
+        ansible_host: "88.31.10.11"
+      hosts: 88.31.10.11
+    adrastea:
+      vars:
+        ansible_host: "88.31.10.12"
+      hosts: 88.31.10.12
+    amalthea:
+      vars:
+        ansible_host: "88.31.10.13"
+      hosts: 88.31.10.13
+    thebe:
+      vars:
+        ansible_host: "88.31.10.14"
+      hosts: 88.31.10.14
+    io:
+      vars:
+        ansible_host: "88.31.10.15"
+      hosts: 88.31.10.15
+    europa:
+      vars:
+        ansible_host: "88.31.10.16"
+      hosts: 88.31.10.16
+    ganymede:
+      vars:
+        ansible_host: "88.31.10.17"
+      hosts: 88.31.10.17
+    callisto:
+      vars:
+        ansible_host: "88.31.10.18"
+      hosts: 88.31.10.18
+    themisto:
+      vars:
+        ansible_host: "88.31.10.19"
+      hosts: 88.31.10.19
+    leda:
+      vars:
+        ansible_host: "88.31.10.20"
+      hosts: 88.31.10.20
+
+    red:
+      children:
+        metis:
+        adrastea:
+        amalthea:
+        thebe:
+        io:
+        europa:
+        ganymede:
+        callisto:
+        themisto:
+        leda:

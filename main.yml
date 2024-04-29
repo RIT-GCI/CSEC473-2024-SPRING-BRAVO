@@ -1,0 +1,91 @@
+---
+- name: Create Hosts | Infra
+  hosts: localhost
+  roles:
+    - create-hosts
+  tags:
+    - never
+    - create-hosts
+
+- name: Deploy Standards | Windows
+  hosts: windows
+  roles:
+    - deploy-windows-standards
+  tags:
+    - never
+    - standards
+    - windows-standards
+    - deploy-windows-standards
+
+- name: Deploy Standards| Linux
+  hosts: linux
+  roles:
+    - deploy-linux-standards
+  tags:
+    - never
+    - standardss
+    - linux-standards
+    - deploy-linux-standards
+
+- name: Deploy Domain | Windows | Local
+  hosts: apollo
+  roles:
+    - deploy-domain
+  tags:
+    - never
+    - domain
+    - deploy-domain
+
+- name: Deploy Web | Windows | Local
+  hosts: electron
+  roles:
+    - deploy-web
+  tags:
+    - never
+    - web
+    - deploy-web
+
+- name: Deploy Mail | Linux | Local
+  hosts: falcon
+  roles:
+    - deploy-mail
+  tags:
+    - never
+    - mail
+    - deploy-mail
+
+- name: Deploy SQL | Linux | Local
+  hosts: discovery
+  roles:
+    - deploy-mysql
+  tags:
+    - never
+    - sql
+    - deploy-sql
+
+- name: Deploy Satellite | Linux | Remote
+  hosts: satellite
+  roles:
+    - deploy-satellite
+  tags:
+    - never
+    - satellite
+    - deploy-satellite
+
+- name: Deploy Cosmos | Linux | Remote
+  hosts: mercury
+  roles:
+    - deploy-cosmos
+  tags:
+    - never
+    - cosmos
+    - deploy-cosmos
+
+- name: Deploy SMB | Windows | Remote
+  hosts: 
+  roles:
+    - deploy-smb
+  tags:
+    - never
+    - smb
+    - deploy-smb

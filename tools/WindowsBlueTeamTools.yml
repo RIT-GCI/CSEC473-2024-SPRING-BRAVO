@@ -1,0 +1,43 @@
+---
+
+- name: Install Blue Team tools on Windows
+  hosts: apollo,electron,pioneer
+  tasks:
+
+  - name: Copy Wireshark installer to host
+    copy:
+      src: /home/ubuntu/ansible/Wireshark-4.2.3-x64.exe
+      dest: C:\Users\ansible\Wireshark-4.2.3-x64.exe
+
+  - name: Install Wireshark
+    win_package:
+      path: C:\Users\ansible\Wireshark-4.2.3-x64.exe
+      state: present
+      arguments: /S
+
+  - name: Copy Sysinternals suite zip file to host
+    copy:
+      src: /home/ubuntu/ansible/SysinternalsSuite.zip
+      dest: C:\Users\ansible\SysinternalsSuite.zip
+
+  - name: Unzip the Sysinternals suite zip file
+    win_unzip:
+      src: C:\Users\ansible\SysinternalsSuite.zip
+      dest: C:\Tools
+      creates: C:\Tools
+
+  - name: Set Sysinternals suite to path, making it a command
+    win_path:
+      elements:
+      - 'C:\Tools'
+
+  - name: Copy ProcessHacker setup executable to host
+    copy:
+      src: /home/ubuntu/ansible/processhacker-2.39-setup.exe
+      dest: C:\Users\ansible\processhacker-2.39-setup.exe
+
+  - name: Install ProcessHacker
+    win_package:
+      path: C:\Users\ansible\processhacker-2.39-setup.exe
+      state: present
+      arguments: /SILENT

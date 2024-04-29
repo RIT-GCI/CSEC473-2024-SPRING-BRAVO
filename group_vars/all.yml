@@ -1,0 +1,33 @@
+---
+greyteam_user: ansible
+greyteam_password: "ansible"
+ansible_password: "{{ greyteam_password }}"
+ansible_user: "{{ greyteam_user }}"
+
+# Domain Controller & Domain Info
+# domain: "{{ inventory_hostname | replace(inventory_hostname_short, '') | replace('.', '', 1) }}"
+dc_ip: "192.168.{{ team_number|int }}.10"
+default_login_shell: "/bin/bash"
+
+global_team_num_int: "{{ team_number|int }}"
+global_team_num: "{{ team_number }}"
+
+# Users
+domain_admins:
+  - {name: 'Armstrong', firstname: 'Neil', surname: 'Armstrong', password: '{{ default_passd }}', groups: "DnsAdmins, DnsUpdateProxy, Domain Admins", attributes: {telephoneNumber: "123-555-555", uidNumber: 1001, unixHomeDirectory: "/home/Armstrong", loginShell: "{{default_login_shell}}"}}
+  - {name: 'Aldrin', firstname: 'Buzz', surname: 'Aldrin', password: '{{ default_pass }}', groups: "DnsAdmins, DnsUpdateProxy,Domain Admins", attributes: {telephoneNumber: "123-555-556", uidNumber: 1002, loginShell: "{{default_login_shell}}"}}
+  - {name: 'McAuliffe', firstname: 'christa', surname: 'McAuliffe', password: '{{ default_pass }}', groups: "DnsAdmins, DnsUpdateProxy, Domain Admins", attributes: {telephoneNumber: "123-555-557", uidNumber: 1003, unixHomeDirectory: "/home/McAuliffe", loginShell: "{{default_login_shell}}"}}
+  
+domain_users:
+   - {name: 'Gagarin', firstname: 'Yuri', surname: 'Gagarin', password: '{{ default_pass }}', groups: "Domain Users", attributes: {telephoneNumber: "123-555-558", uidNumber: 1004, unixHomeDirectory: "/home/Gagarin", loginShell: "{{default_login_shell}}"}}
+   - {name: 'Hadfield', firstname: 'Chris', surname: 'Hadfield', password: '{{ default_passd }}', groups: "Domain Users", attributes: {telephoneNumber: "123-555-559", uidNumber: 1005, unixHomeDirectory: "/home/Hadfield", loginShell: "{{default_login_shell}}"}}
+   - {name: 'Glenn', firstname: 'John', surname: 'Glenn', password: '{{ default_pass }}', groups: "Domain Users", attributes: {telephoneNumber: "123-555-554", uidNumber: 1006, unixHomeDirectory: "/home/Glenn", loginShell: "{{default_login_shell}}"}}
+   - {name: 'Shepard', firstname: 'Alan', surname: 'Shepard', password: '{{ default_pass }}', groups: "Domain Users", attributes: {telephoneNumber: "123-555-553", uidNumber: 1007, unixHomeDirectory: "/home/Shepard", loginShell: "{{default_login_shell}}"}}
+   - {name: 'Ride', firstname: 'sally', surname: 'Ride', password: '{{ default_pass }}', groups: "Domain Users", attributes: {telephoneNumber: "123-555-552", uidNumber: 1008, unixHomeDirectory: "/home/Ride", loginShell: "{{default_login_shell}}"}}
+   - {name: 'Ochoa', firstname: 'Ellen', surname: 'Ochoa', password: '{{ default_pass }}', groups: "Domain Users", attributes: {telephoneNumber: "123-555-551", uidNumber: 1009, unixHomeDirectory: "/home/Ochoa", loginShell: "{{default_login_shell}}"}}
+   - {name: 'Kelly', firstname: 'Scott', surname: 'Kelly', password: '{{ default_pass }}', groups: "Domain Users", attributes: {telephoneNumber: "123-555-550", uidNumber: 1010, unixHomeDirectory: "/home/Kelly", loginShell: "{{default_login_shell}}"}}
+default_pass: P@ssw0rd!
+domain_devices:
+#Domain Info
+netbios: "team{{ team_number }}"
+domain: "space.{{ team_number }}.com"

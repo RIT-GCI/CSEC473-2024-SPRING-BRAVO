@@ -1,0 +1,23 @@
+---
+- name: Create Hosts | Red
+  hosts: localhost
+  roles:
+    - create-hosts-red
+  tags:
+    - never
+    - create-hosts
+    - create
+
+- name: Deploy Standards | Red
+  hosts: red
+  become: yes
+  environment:
+    ANSIBLE_HOST_KEY_CHECKING: "False" 
+  roles:
+    - deploy-red-standards
+  tags:
+    - never
+    - standards
+    - red-standards
+    - deploy-red-standards
+    - deploy-standards

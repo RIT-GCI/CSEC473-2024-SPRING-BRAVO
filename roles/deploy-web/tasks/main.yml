@@ -1,0 +1,15 @@
+---
+- name: Install IIS
+  ansible.windows.win_shell: Enable-WindowsOptionalFeature -Online -FeatureName IIS-WebServerRole,IIS-WebServer,IIS-CommonHttpFeatures,IIS-ManagementConsole,IIS-HttpErrors,IIS-HttpRedirect,IIS-WindowsAuthentication,IIS-StaticContent,IIS-DefaultDocument,IIS-HttpCompressionStatic,IIS-DirectoryBrowsing
+  become: yes
+  become_method: runas
+  become_user: ansible
+
+- name: Reboot Windows
+  ansible.windows.win_reboot:
+
+- name: Restart IIS
+  ansible.windows.win_command: iisreset
+  become: yes
+  become_method: runas
+  become_user: ansible

@@ -1,0 +1,38 @@
+---
+
+- name: Install Postfix
+  apt:
+    name: postfix
+    state: present
+
+- name: Start and enable Postfix services
+  service:
+    name:
+      postfix:
+      state: started
+      enabled: yes
+      update_cache: yes
+
+- name: Add email accounts to /etc/postfix/virtual
+  lineinfile:
+    path: /etc/postfix/virtual
+    line: "{{ item.email }} {{ item.destination }}"
+    create: yes
+  loop:
+    - { email: "Armstrong@{{ domain }}", destination: "Armstrong@{{ domain }}" }
+    - { email: "Aldrin@{{ domain }}m", destination: "Aldrin@{{ domain }}" }
+
+- name: Update Postfix virtual_alias_maps
+  command: postmap /etc/postfix/virtual
+  changed_when: false
+  register: postmap_result
+
+- name: Reload Postfix if postmap command executed successfully
+  meta: flush_handlers
+  when: postmap_result is success
+
+- name: Send email from Armstrong@space.com to Aldrin@space.com
+  command: echo "Launch Code hdkuijkfodfeoked" | mail -s "Secret LAUNCH CODE" Aldrin@{{ domain }}
+
+- name: Send email from Aldrin@space.com to Armstrong@space.com
+  command: echo "Launch Code hdkuijkfodfeoked" | mail -s "Secret LAUNCH CODE" Aldrin@{{ domain }}

@@ -1,0 +1,110 @@
+---
+- name: Get Networks Info
+  command:
+    cmd: "openstack network list -f json -c ID -c Name"
+  register: networks_info
+
+- name: Convert JSON array to dictionary
+  set_fact:
+    networks: "{{ networks | default({}) | combine({item.Name: {'id': item.ID}}) }}"
+  loop: "{{ networks_info.stdout | from_json }}"
+
+- name: Set sat network name
+  set_fact:
+    sat_net_name: "sat_{{ team_number }}_net"
+
+- name: Set local network name
+  set_fact:
+    local_net_name: "local_{{ team_number }}_net"
+
+- name: Set remote network name
+  set_fact:
+    remote_net_name: "remote_{{ team_number }}_net"
+
+- name: Domain Controller (Apollo)
+  command: >
+    openstack server create
+    --flavor xlarge
+    --image WinSrv2019-17763-2022
+    --boot-from-volume 100
+    --user-data files/userdata.ps1
+    --nic net-id={{ networks[local_net_name].id }},v4-fixed-ip="192.168.{{ team_number|int }}.10"
+    --nic net-id={{ networks['rustdesk_net'].id }}
+    --key-name "bravo-control-node"
+    "Team {{ team_number }} Domain Controller (Apollo)"
+  ignore_errors: yes
+
+- name: Mail Server (Falcon)
+  command: >
+    openstack server create
+    --flavor large
+    --image DebianBuster10
+    --boot-from-volume 100
+    --user-data files/userdata.sh
+    --nic net-id={{ networks[local_net_name].id }},v4-fixed-ip="192.168.{{ team_number|int }}.20"
+    --nic net-id={{ networks['rustdesk_net'].id }}
+    --key-name "bravo-control-node"
+    "Team {{ team_number }} Mail Server (Falcon)"
+  ignore_errors: yes
+
+- name: Web Server (Electron)
+  command: >
+    openstack server create
+    --flavor large
+    --image WinSrv2019-17763-2022
+    --boot-from-volume 100
+    --user-data files/userdata.ps1
+    --nic net-id={{ networks[local_net_name].id }},v4-fixed-ip="192.168.{{ team_number|int }}.30"
+    --nic net-id={{ networks['rustdesk_net'].id }}
+    --key-name "bravo-control-node"
+    "Team {{ team_number }} Web Server (Electron)"
+  ignore_errors: yes
+
+- name: MySQL Server (Discovery)
+  command: >
+    openstack server create
+    --flavor large
+    --image UbuntuJammy2204-Desktop
+    --boot-from-volume 100
+    --user-data files/userdata.sh
+    --nic net-id={{ networks[local_net_name].id }},v4-fixed-ip="192.168.{{ team_number|int }}.40"
+    --nic net-id={{ networks['rustdesk_net'].id }}
+    --key-name "bravo-control-node"
+    "Team {{ team_number }} MySQL Server (Discovery)"
+  ignore_errors: yes
+
+- name: Linux Workstation A (Mercury)
+  command: >
+    openstack server create
+    --flavor large
+    --image UbuntuJammy2204-Desktop
+    --boot-from-volume 100
+    --user-data files/userdata.sh
+    --nic net-id={{ networks[remote_net_name].id }},v4-fixed-ip="10.0.{{ team_number|int }}.10"
+    --key-name "bravo-control-node"
+    "Team {{ team_number }} Linux Workstation A (Mercury)"
+  ignore_errors: yes
+
+- name: Windows Workstation (Pioneer)
+  command: >
+    openstack server create
+    --flavor large
+    --image Win10-20H2v2
+    --boot-from-volume 100
+    --user-data files/userdata.ps1
+    --nic net-id={{ networks[remote_net_name].id }},v4-fixed-ip="10.0.{{ team_number|int }}.20"
+    --key-name "bravo-control-node"
+    "Team {{ team_number }} Windows Workstation (Pioneer)"
+  ignore_errors: yes
+  
+- name: Satellite Server (Dwayne-inator)
+  command: >
+    openstack server create
+    --flavor xlarge
+    --image UbuntuJammy2204-Desktop
+    --boot-from-volume 100
+    --user-data files/userdata.sh
+    --nic net-id={{ networks[sat_net_name].id }},v4-fixed-ip="172.128.{{ team_number|int }}.10"
+    --key-name "bravo-control-node"
+    "Team {{ team_number }} Satellite Server (Dwayne-inator)"
+  ignore_errors: yes

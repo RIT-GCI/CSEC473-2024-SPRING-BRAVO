@@ -1,0 +1,93 @@
+---
+- name: Install Active Directory Domain Services
+  win_feature:
+    name: AD-Domain-Services
+    state: present
+    include_management_tools: true
+    include_sub_features: true
+
+- name: Update Password
+  ansible.windows.win_user:
+    name: Administrator
+    password: "P@ssw0rd!"
+    update_password: always  
+
+- name: Set Local Administrator Password
+  win_shell: |
+    $adminPassword = ConvertTo-SecureString -AsPlainText "{{ default_pass }}" -Force
+    Set-LocalUser -Name Administrator -Password $adminPassword
+  args:
+    executable: powershell.exe
+
+- name: Setup Active Directory Controller
+  win_domain:
+    dns_domain_name: "{{ domain }}"
+    safe_mode_password: "{{ default_pass }}"
+  register: active_directory_controllers
+
+- name: Reboot after the DC is created
+  win_reboot:
+    msg: "The Server will now restart"
+  when: active_directory_controllers.reboot_required
+
+- name: List Domain Controllers in Domain
+  win_shell: "nltest /dclist:{{ domain }}"
+  register: domain_list
+  
+- name: Create Windows Domain Admins
+  win_domain_user: 
+    name: "{{ item.name }}"
+    firstname: "{{ item.firstname }}"
+    surname: "{{ item.surname }}"
+    password: "{{ item.password }}"
+    groups: "{{ item.groups|default(omit) }}"
+    state: present
+    email: '"{{ item.name}}"@{{ domain_name}}'
+    attributes: "{{ item.attributes|default(omit) }}"
+  with_items: "{{ domain_admins }}"
+  
+- name: Create Windows Domain Users
+  win_domain_user: 
+    name: "{{ item.name }}"
+    firstname: "{{ item.firstname }}"
+    surname: "{{ item.surname }}"
+    password: "{{ item.password }}"
+    groups: "{{ item.groups|default(omit) }}"
+    state: present
+    email: '"{{ item.name}}"@{{ domain_name}}'
+    attributes: "{{ item.attributes|default(omit) }}"
+  with_items: "{{ domain_users }}"
+- debug:
+    var: domain_list
+
+- name: Install DNS
+  win_feature:
+    name: DNS
+    #Ensures DNS is present
+    state: present
+    #install all sub features and tools
+    include_sub_features: yes
+    include_management_tools: yes
+  register: win_feature
+
+- name: Set DNS Server IP address
+  win_dns_client:
+    adapternames: "*"
+    ipv4_addresses:
+      - "{{ dc_ip }}"
+    log_path: C:\dns_log.txt
+  register: dns_client_result
+
+
+- name: Join Client To The Domain
+  ansible.windows.win_domain_membership:
+    dns_domain_name: "{{ domain }}"
+    domain_admin_password: "{{ default_pass }}"
+    domain_admin_user: "Armstrong"
+    state: domain
+    hostname: "{{ domain_devices }}"
+  register: domain_result
+- name: Start DNS Services
+  win_service:
+    name: DNS
+    state: started
